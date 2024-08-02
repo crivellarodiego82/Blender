@@ -1,0 +1,53 @@
+Animazione Braccia:
+
+import bpy
+import math
+from mathutils import Quaternion
+
+# Armatura
+armature = bpy.data.objects['Umano']
+
+# Passa in modalità Posa
+bpy.context.view_layer.objects.active = armature
+bpy.ops.object.mode_set(mode='POSE')
+
+# Funzione per applicare la rotazione iniziale e finale ad un osso specifico
+def set_bone_rotation(bone_name, initial_quat, final_quat, delay):
+    bone = armature.pose.bones[bone_name]
+    
+    # Imposta la rotazione iniziale in quaternione
+    bone.rotation_mode = 'QUATERNION'
+    bone.rotation_quaternion = initial_quat
+    print(f"Rotazione iniziale di {bone_name}: {bone.rotation_quaternion}")
+    
+    # Funzione per applicare la rotazione finale
+    def apply_final_rotation():
+        bone.rotation_quaternion = final_quat
+        print(f"Rotazione finale di {bone_name} applicata: {bone.rotation_quaternion}")
+        return None  # Non ripete il timer
+    
+    # Funzione per ripristinare la rotazione iniziale
+    def reset_initial_rotation():
+        bone.rotation_quaternion = initial_quat
+        print(f"Rotazione iniziale di {bone_name} ripristinata: {bone.rotation_quaternion}")
+        return None  # Non ripete il timer
+    
+    # Imposta il ritardo per la rotazione finale
+    bpy.app.timers.register(apply_final_rotation, first_interval=delay)
+
+    # Imposta il ritardo per il ripristino della rotazione iniziale
+    bpy.app.timers.register(reset_initial_rotation, first_interval=delay + 2.0)
+
+# Definizione delle rotazioni in quaternioni per i vari ossa
+
+# Per 'Omero_Sinistro'
+initial_quat_left = Quaternion((1.000, 0.000, 0.000, 0.0000))
+final_quat_left = Quaternion((0.988, 0.000, -0.000, 0.155))
+set_bone_rotation('Omero_Sinistro', initial_quat_left, final_quat_left, delay=2.0)
+
+# Per 'Omero_Destro'
+initial_quat_right = Quaternion((1.000, 0.000, 0.000, 0.0000))
+final_quat_right = Quaternion((0.988, 0.000, -0.000, -0.156))
+set_bone_rotation('Omero_Destro', initial_quat_right, final_quat_right, delay=4.0)
+
+print("Script eseguito, in attesa di temporizzatori...")
